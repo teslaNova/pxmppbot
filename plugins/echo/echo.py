@@ -8,7 +8,7 @@ class EchoCommand(Command):
   
   def handle(self, client, msg):
     try:
-     if Config.get('auth.user') in msg['from']:
+     if Config.get('auth.user') == msg['mucnick']:
         return
         
     except:
