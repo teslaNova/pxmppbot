@@ -1,7 +1,9 @@
 import os
 import imp
+import copy
 
 from channel import Channel
+from config import Config
 
 class Command:
   name = "cmd"
@@ -13,12 +15,14 @@ class Command:
   
   scope = [ScopeMUC, ScopePrivate]
   
+  Prefix = '!'
+  
   def handle(self, msg):
     pass
   
-  
 class Plugin(object):
   plugins = []
+  commands = {}
 
   name = "plugin"
 
@@ -30,15 +34,43 @@ class Plugin(object):
       return
       
     for plugin in Plugin.plugins:
-      try:
+      if msg['type'] in ('groupchat'):
         if msg['mucroom'] in Channel.channels:
-          if False == Channel.channels[msg['mucroom']].is_plugin_allowed(plugin.name):
+          if plugin.name not in Channel.channels[msg['mucroom']].plugins and plugin.name not in Config.get('misc.master_plugins'):
             continue
-
-      except:
-        pass
         
       plugin.handle(client, msg)
+        
+  def handle_commands(self, client, msg):
+    cmd = msg['body'].split(' ')[0]
+    
+    if cmd[0] != Command.Prefix:
+      return
+    
+    if cmd[1:] not in self.commands:
+      return
+
+    cmd = self.commands[cmd[1:]]
+
+    if msg['type'] == 'groupchat':
+      if Command.ScopeMUC not in cmd.scope:
+        return
+      
+      if cmd.privileged and msg['from'] not in Config.get('privileged'):
+        return
+    
+    elif msg['type'] in ('normal', 'chat'):
+      if Command.ScopePrivate not in cmd.scope:
+        return
+      
+      jid = str(msg['from']).split(u'/')[0]
+        
+      if cmd.privileged and jid not in Config.get('privileged'):
+        return
+    
+    new_msg = copy.copy(msg)
+    new_msg['body'] = ' '.join(new_msg['body'].split(' ')[1:])
+    cmd.handle(client, new_msg)
         
   @staticmethod
   def load_all():

@@ -24,10 +24,4 @@ class Channel(object):
     
     
   def leave(self):
-    pass
-  
-  def is_plugin_allowed(self, name):
-    if name in self.plugins:
-      return True
-      
-    return False
+    client.plugin['xep_0045'].leaveMUC(self.jid, self.nick, 'leaving..')
