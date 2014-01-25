@@ -22,6 +22,6 @@ class Channel(object):
     
     client.plugin['xep_0045'].joinMUC(jid, nick, wait=True)
     
-    
   def leave(self):
+    del Channel.channels[self.jid]
     client.plugin['xep_0045'].leaveMUC(self.jid, self.nick, 'leaving..')
