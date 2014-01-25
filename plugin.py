@@ -1,6 +1,8 @@
 import os
 import imp
 
+from channel import Channel
+
 class Command:
   name = "cmd"
   desc = "cmddesc"
@@ -18,6 +20,8 @@ class Command:
 class Plugin(object):
   plugins = []
 
+  name = "plugin"
+
   def __init__(self):
     pass
     
@@ -26,6 +30,14 @@ class Plugin(object):
       return
       
     for plugin in Plugin.plugins:
+      try:
+        if msg['mucroom'] in Channel.channels:
+          if False == Channel.channels[msg['mucroom']].is_plugin_allowed(plugin.name):
+            continue
+
+      except:
+        pass
+        
       plugin.handle(client, msg)
         
   @staticmethod

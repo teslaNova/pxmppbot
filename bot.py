@@ -2,6 +2,7 @@ import sleekxmpp
 
 from config import Config
 from plugin import Plugin
+from channel import Channel
 
 class Bot(sleekxmpp.ClientXMPP):
   def __init__(self):
@@ -15,7 +16,7 @@ class Bot(sleekxmpp.ClientXMPP):
     self.register_plugin('xep_0030')
     self.register_plugin('xep_0045')
     self.register_plugin('xep_0199')
-      
+    
   def run(self):
     if self.connect((Config.get('auth.server'), 5222)):
       self.process(block=True)   
@@ -25,9 +26,7 @@ class Bot(sleekxmpp.ClientXMPP):
     self.get_roster()
     
     for channel in Config.get('channels'):
-      pass
-      #Channel.join(self, channel['jid'])
-      self.plugin['xep_0045'].joinMUC(channel['jid'], Config.get('auth.user'), wait=True) # TODO: check if everything went fine and add to self.channels (active channel modules, etc.)
+      Channel.join(self, channel['jid'], channel['plugins'])
     
   def message_private(self, msg):
     Plugin().handle(self, msg)
