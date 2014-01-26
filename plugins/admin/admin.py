@@ -116,7 +116,7 @@ class EvalCommand(Command):
   def __init__(self):
     self.buf = {}
   
-  def handle(self, client, msg): # evil!
+  def handle(self, client, msg):
     try:
         res = eval(msg['body'])
       
@@ -124,11 +124,36 @@ class EvalCommand(Command):
       return
       
     msg.reply("Result: {0}".format(res)).send()
+    
+class ConfigCommand(Command):
+  name = "config"
+  
+  privileged = True
+  
+  def handle(self, client, msg):
+    token = msg['body'].split(' ')
+    
+    try:
+      if token[0] == 'reload':
+        Config.load(Config.file)
+        
+      elif token[0] == 'save':
+        pass
+        
+    except:
+      pass
       
 class AdminPlugin(Plugin):
   name = "admin"
   
-  commands = {'plugin': PluginCommand(), 'quit': QuitCommand(), 'roster': RosterCommand(), 'channel': ChannelCommand(), 'eval': EvalCommand()}
+  commands = {
+    'plugin': PluginCommand(),
+    'quit': QuitCommand(),
+    'roster': RosterCommand(),
+    'channel': ChannelCommand(),
+    'eval': EvalCommand(), # evil, just for development purpose
+    'config': ConfigCommand()
+  }
   
   def handle(self, client, msg):
     self.handle_commands(client, msg)
