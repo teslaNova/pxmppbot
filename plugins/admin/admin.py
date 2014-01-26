@@ -12,17 +12,13 @@ class PluginCommand(Command):
   def handle(self, client, msg):
     token = msg['body'].split(' ')
     
-    #print token
-    
     try:
       if token[0] == '+':
-        #print "+", " ", Channel.channels[token[1]]
         Channel.channels[token[1]].plugins.append(token[2])
         
         msg.reply("Plugin {0} in {1} has beend activated".format(token[2], token[1])).send()
     
       elif token[0] == '-':
-        #print "-", " ", Channel.channels[token[1]]
         Channel.channels[token[1]].plugins.remove(token[2])
         
         msg.reply("Plugin {0} in {1} has beend deactivated".format(token[2], token[1])).send()
