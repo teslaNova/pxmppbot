@@ -116,41 +116,8 @@ class EvalCommand(Command):
   def __init__(self):
     self.buf = {}
   
-  def handle(self, client, msg):
+  def handle(self, client, msg): # evil!
     try:
-      if msg['body'][0] == '#': # TODO: not working right now
-        eid = msg['body'].split(' ')[0]
-        es = ' '.join(msg['body'].split(' ')[1:])
-      
-        if eid == '#':
-          return
-      
-        #print (eid)
-        #print (es)
-      
-        if es == '#run':
-          res = str(exec(self.buf[eid]))
-          #print (res)
-        
-        elif es == '#clear':
-          del self.buf[eid]
-          return
-    
-        elif es == '#show':
-          msg.reply("Eval Code: {0}".format(self.buf[eid])).send()
-          return
-    
-        else:
-          if eid not in self.buf:
-            self.buf[eid] = str(es)
-          
-          else:  
-            self.buf[eid] += "\n"
-            self.buf[eid] += es
-            
-          return
-    
-      else:
         res = eval(msg['body'])
       
     except:
