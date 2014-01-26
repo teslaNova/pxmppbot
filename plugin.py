@@ -25,6 +25,9 @@ class Plugin(object):
   commands = {}
 
   name = "plugin"
+  
+  def __str__(self):
+    return name
 
   def __init__(self):
     pass
@@ -34,14 +37,33 @@ class Plugin(object):
       return
       
     for plugin in Plugin.plugins:
+      room_short = msg['mucroom'].split('@')[0]
+      
       if msg['type'] in ('groupchat'):
-        if msg['mucroom'] in Channel.channels:
-          if plugin.name not in Channel.channels[msg['mucroom']].plugins and plugin.name not in Config.get('misc.master_plugins'):
+        if room_short in Channel.channels:
+          if plugin.name not in Channel.channels[room_short].plugins and plugin.name not in Config.get('misc.master_plugins'):
             continue
         
       plugin.handle(client, msg)
         
   def handle_commands(self, client, msg):
+    def _check_priviledge(client, msg):
+      if msg['from'] in Config.get('privileged'):
+        return True
+        
+      try:  
+        if msg['type'] == 'groupchat':
+          room = client.plugin['xep_0045'].rooms[msg['from'].bare]
+          mucuser = room[msg['from'].resource]
+        
+          if mucuser['jid'].bare in Config.get('privileged'):
+            return True
+
+      except:
+        pass
+        
+      return False
+    
     cmd = msg['body'].split(' ')[0]
     
     if cmd[0] != Command.Prefix:
@@ -56,7 +78,7 @@ class Plugin(object):
       if Command.ScopeMUC not in cmd.scope:
         return
       
-      if cmd.privileged and msg['from'] not in Config.get('privileged'):
+      if cmd.privileged and not _check_priviledge(client, msg):
         return
     
     elif msg['type'] in ('normal', 'chat'):
