@@ -11,17 +11,18 @@ class Channel(object):
     self.plugins = allowed_plugins
     
   @staticmethod
-  def join(client, jid, allowed_plugins=[], nick=''):
+  def join(client, jid, allowed_plugins=[], nick=''): #jid -> channelname @ Config.get('auth.muc')
     if nick is '':
       nick = Config.get('auth.user')
 
     ch = Channel(client, jid, allowed_plugins)
-    ch.nick = nick
-    
-    Channel.channels[jid] = ch
+    ch.nick = nick    
+    ch.short = jid.split('@')[0]
+
+    Channel.channels[ch.short] = ch
     
     client.plugin['xep_0045'].joinMUC(jid, nick, wait=True)
     
   def leave(self):
-    del Channel.channels[self.jid]
-    client.plugin['xep_0045'].leaveMUC(self.jid, self.nick, 'leaving..')
+    self.client.plugin['xep_0045'].leaveMUC(self.jid, self.nick)
+    del Channel.channels[self.short]
